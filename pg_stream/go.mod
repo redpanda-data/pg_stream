@@ -1,4 +1,4 @@
-module pg_stream
+module github.com/usedatabrew/pg_stream_benthos/pg_stream
 
 go 1.18
 

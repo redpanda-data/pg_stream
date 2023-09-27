@@ -1,4 +1,4 @@
-module pg_stream_schemaless
+module github.com/usedatabrew/pg_stream_benthos/pg_stream_schemaless
 
 go 1.18
 
