@@ -8,7 +8,7 @@ Welcome to the PostgreSQL Logical Replication Streaming Plugin for Benthos! This
 
 - **Flexible Configuration:** Easily configure the plugin to specify the database connection details, replication slot, and table filtering rules.
 
-- **Scalability:** Scale your data streaming pipeline horizontally to handle high data volumes effortlessly.
+- **Checkpoints:** Store your replication consuming progress in Redis
 
 ## Prerequisites
 
