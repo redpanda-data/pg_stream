@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/Jeffail/benthos/v3/public/service"
+	"github.com/benthosdev/benthos/v4/public/service"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/lucasepe/codename"
 	"github.com/usedatabrew/pglogicalstream"
