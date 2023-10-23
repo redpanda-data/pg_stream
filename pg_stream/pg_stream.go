@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/Jeffail/benthos/v3/public/service"
+	"github.com/benthosdev/benthos/v4/public/service"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/lucasepe/codename"
 	"github.com/usedatabrew/pglogicalstream"
@@ -59,7 +59,7 @@ var pgStreamConfigSpec = service.NewConfigSpec().
 		Example("my_test_slot").
 		Default(randomSlotName))
 
-func newPgStreamInput(conf *service.ParsedConfig) (s service.Input, err error) {
+func newPgStreamInput(conf *service.ParsedConfig, logger *service.Logger) (s service.Input, err error) {
 	var (
 		dbName         string
 		dbPort         int
@@ -143,6 +143,7 @@ func newPgStreamInput(conf *service.ParsedConfig) (s service.Input, err error) {
 		schema:         dbSchema,
 		tables:         tables,
 		redisUri:       redisUri,
+		logger:         logger,
 	}), err
 }
 
@@ -153,7 +154,7 @@ func init() {
 	err := service.RegisterInput(
 		"pg_stream", pgStreamConfigSpec,
 		func(conf *service.ParsedConfig, mgr *service.Resources) (service.Input, error) {
-			return newPgStreamInput(conf)
+			return newPgStreamInput(conf, mgr.Logger())
 		})
 	if err != nil {
 		panic(err)
@@ -168,6 +169,7 @@ type pgStreamInput struct {
 	schema          string
 	tables          []string
 	streamSnapshot  bool
+	logger          *service.Logger
 }
 
 func (p *pgStreamInput) Connect(ctx context.Context) error {
