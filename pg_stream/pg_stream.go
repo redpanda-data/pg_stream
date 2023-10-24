@@ -198,6 +198,7 @@ func (p *pgStreamInput) Connect(ctx context.Context) error {
 		ReplicationSlotName: fmt.Sprintf("rs_rs_%s", p.slotName),
 		TlsVerify:           "require",
 		StreamOldData:       p.streamSnapshot,
+		SeparateChanges:     true,
 	}, checkPointer)
 	if err != nil {
 		panic(err)
