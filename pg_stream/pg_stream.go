@@ -45,6 +45,10 @@ var pgStreamConfigSpec = service.NewConfigSpec().
 		Description("Set `true` if you want to receive all the data that currently exist in database").
 		Example(true).
 		Default(false)).
+	Field(service.NewFloatField("snapshot_memory_safety_factor").
+		Description("Sets amout of memory that can be used to stream snapshot. If affects batch sizes. If we want to use only 25% of the memory available - put 0.25 factor. It will make initial streaming slower, but it will prevent your worker from OOM Kill").
+		Example(0.2).
+		Default(0.5)).
 	Field(service.NewStringListField("tables").
 		Example(`
 			- my_table
@@ -61,16 +65,17 @@ var pgStreamConfigSpec = service.NewConfigSpec().
 
 func newPgStreamInput(conf *service.ParsedConfig, logger *service.Logger) (s service.Input, err error) {
 	var (
-		dbName         string
-		dbPort         int
-		dbHost         string
-		dbSchema       string
-		dbUser         string
-		dbPassword     string
-		dbSlotName     string
-		tables         []string
-		redisUri       string
-		streamSnapshot bool
+		dbName                  string
+		dbPort                  int
+		dbHost                  string
+		dbSchema                string
+		dbUser                  string
+		dbPassword              string
+		dbSlotName              string
+		tables                  []string
+		redisUri                string
+		streamSnapshot          bool
+		snapshotMemSafetyFactor float64
 	)
 
 	dbSchema, err = conf.FieldString("schema")
@@ -122,6 +127,11 @@ func newPgStreamInput(conf *service.ParsedConfig, logger *service.Logger) (s ser
 		return nil, err
 	}
 
+	snapshotMemSafetyFactor, err = conf.FieldFloat("snapshot_memory_safety_factor")
+	if err != nil {
+		return nil, err
+	}
+
 	redisUri, err = conf.FieldString("checkpoint_storage")
 	if err != nil {
 		return nil, err
@@ -138,12 +148,13 @@ func newPgStreamInput(conf *service.ParsedConfig, logger *service.Logger) (s ser
 			},
 			Password: dbPassword,
 		},
-		streamSnapshot: streamSnapshot,
-		slotName:       dbSlotName,
-		schema:         dbSchema,
-		tables:         tables,
-		redisUri:       redisUri,
-		logger:         logger,
+		streamSnapshot:          streamSnapshot,
+		snapshotMemSafetyFactor: snapshotMemSafetyFactor,
+		slotName:                dbSlotName,
+		schema:                  dbSchema,
+		tables:                  tables,
+		redisUri:                redisUri,
+		logger:                  logger,
 	}), err
 }
 
@@ -162,14 +173,15 @@ func init() {
 }
 
 type pgStreamInput struct {
-	dbConfig        pgconn.Config
-	pglogicalStream *pglogicalstream.Stream
-	redisUri        string
-	slotName        string
-	schema          string
-	tables          []string
-	streamSnapshot  bool
-	logger          *service.Logger
+	dbConfig                pgconn.Config
+	pglogicalStream         *pglogicalstream.Stream
+	redisUri                string
+	slotName                string
+	schema                  string
+	tables                  []string
+	streamSnapshot          bool
+	snapshotMemSafetyFactor float64
+	logger                  *service.Logger
 }
 
 func (p *pgStreamInput) Connect(ctx context.Context) error {
@@ -188,17 +200,18 @@ func (p *pgStreamInput) Connect(ctx context.Context) error {
 	}
 
 	pgStream, err := pglogicalstream.NewPgStream(pglogicalstream.Config{
-		DbHost:              p.dbConfig.Host,
-		DbPassword:          p.dbConfig.Password,
-		DbUser:              p.dbConfig.User,
-		DbPort:              int(p.dbConfig.Port),
-		DbName:              p.dbConfig.Database,
-		DbSchema:            p.schema,
-		DbTables:            p.tables,
-		ReplicationSlotName: fmt.Sprintf("rs_rs_%s", p.slotName),
-		TlsVerify:           "require",
-		StreamOldData:       p.streamSnapshot,
-		SeparateChanges:     true,
+		DbHost:                     p.dbConfig.Host,
+		DbPassword:                 p.dbConfig.Password,
+		DbUser:                     p.dbConfig.User,
+		DbPort:                     int(p.dbConfig.Port),
+		DbName:                     p.dbConfig.Database,
+		DbSchema:                   p.schema,
+		DbTables:                   p.tables,
+		ReplicationSlotName:        fmt.Sprintf("rs_rs_%s", p.slotName),
+		TlsVerify:                  "require",
+		StreamOldData:              p.streamSnapshot,
+		SnapshotMemorySafetyFactor: p.snapshotMemSafetyFactor,
+		SeparateChanges:            true,
 	}, checkPointer)
 	if err != nil {
 		panic(err)
