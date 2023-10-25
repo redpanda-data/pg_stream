@@ -207,7 +207,7 @@ func (p *pgStreamInput) Connect(ctx context.Context) error {
 		DbName:                     p.dbConfig.Database,
 		DbSchema:                   p.schema,
 		DbTables:                   p.tables,
-		ReplicationSlotName:        fmt.Sprintf("rs_rs_%s", p.slotName),
+		ReplicationSlotName:        fmt.Sprintf("rs_%s", p.slotName),
 		TlsVerify:                  "require",
 		StreamOldData:              p.streamSnapshot,
 		SnapshotMemorySafetyFactor: p.snapshotMemSafetyFactor,

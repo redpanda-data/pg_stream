@@ -1,4 +1,4 @@
-module github.com/usedatabrew/pg_stream_benthos/pg_stream
+module github.com/usedatabrew/benthos_postgres_cdc
 
 go 1.21
 
