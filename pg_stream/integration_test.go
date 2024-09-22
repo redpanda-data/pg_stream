@@ -63,12 +63,10 @@ func TestIntegrationPgCDC(t *testing.T) {
 	pool.MaxWait = 120 * time.Second
 	if err = pool.Retry(func() error {
 		if db, err = sql.Open("postgres", databaseUrl); err != nil {
-			fmt.Println("Error", err)
 			return err
 		}
 
 		if err = db.Ping(); err != nil {
-			fmt.Println("Ping err", err)
 			return err
 		}
 
