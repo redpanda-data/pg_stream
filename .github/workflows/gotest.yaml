@@ -3,20 +3,11 @@ name: Go Test
 on:
   push:
     branches: [main]
-    paths:
-      - "pg_stream/**"
-  pull_request:
-    branches: [main]
-    paths:
-      - "pg_stream/**"
 
 jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./pg_stream
 
     steps:
       - uses: actions/checkout@v3
@@ -26,8 +17,5 @@ jobs:
         with:
           go-version: "1.22"
 
-      - name: Install dependencies
-        run: go mod download
-
       - name: Run tests
-        run: go test -v ./...
+        run: cd pg_stream && go mod tidy && go test -v ./...
