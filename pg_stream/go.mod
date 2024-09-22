@@ -5,7 +5,6 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/charmbracelet/log v0.3.0
 	github.com/jackc/pgx/v5 v5.5.4
 	github.com/jaswdr/faker v1.19.1
 	github.com/lib/pq v1.10.9
@@ -30,6 +29,7 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/charmbracelet/lipgloss v0.9.1 // indirect
+	github.com/charmbracelet/log v0.3.0 // indirect
 	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
 	github.com/containerd/continuity v0.4.3 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
