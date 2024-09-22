@@ -12,6 +12,16 @@ jobs:
       run:
         working-directory: ./pg_stream
 
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
+
+    env:
+      DOCKER_HOST: tcp://docker:2375
+      DOCKER_DRIVER: overlay2
+      YOUR_APP_DB_HOST: docker
+
     steps:
       - uses: actions/checkout@v3
 
